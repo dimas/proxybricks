@@ -1,7 +1,7 @@
 # proxybricks
 Building blocks for a very simple HTTP proxy / web server on Ruby
 
-.h1 Motivation
+# Motivation
 
 I wrote it while working on an JavaScript browser app that needs to call JIRA REST API.
 The server I was using did not send any of the CORS headers (like `Access-Control-Allow-Origin`)
@@ -12,11 +12,11 @@ the same server that was used to load HTML. So I needed something that serves as
 web server for my HTML pages and a sort of a proxy that can relay requests to JIRA
 as a temporary solutuib until admins can configure JIRA with proper CORS headers.
 
-.h1 What is proxybricks
+## What is proxybricks
 
 It is not an ready to use application but a small library you can use to create your simple web server / proxy server. Mostly for testing purposes.
 
-.h2 Simple web server
+## Simple web server
 
 ```ruby
 require_relative 'proxybricks.rb'
@@ -33,7 +33,7 @@ You can test it with
 curl http://localhost:8080/proxybricks.rb
 ```
 
-.h2 Simple proxy
+## Simple proxy
 
 ```ruby
 require_relative 'lib/proxybricks.rb'
@@ -49,11 +49,10 @@ Note that ProxyingRequestHandler only translates to HTTPS targets. If you need H
 and overriding its `connect_target` method.
 
 
-.h2 Combining them together
+## Combining them together
 
 `add_handler` allows you to add multiple handlers, they will be checked in the order they were added and the first handler
 with path being the prefix of URI requested will be invoked.
-
 
 ```ruby
 require_relative 'lib/proxybricks.rb'
@@ -69,7 +68,7 @@ handler from the example above will be receiving URIs like `/static/dir/test.htm
 to exist.
 Similarly, if you make a request to `http://localhost:8080/rest/rest/auth/1/session`, the proxying handler will invoke `https://jira.domain.com/rest/rest/auth/1/session` keeping the `/rest` part.
 
-.h2 Modifying proxied request/response
+## Modifying proxied request/response
 Sometimes (or should I say often?) you will find yourself in a need to patch request or response headers.
 To do that, you need to subclass ProxyingRequestHandler and override `modify_request` and/or `modify_response` methods.
 
