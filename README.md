@@ -45,9 +45,10 @@ server.run
 
 Any request to `http://localhost:8080/path` will be relayed to `https://target.domain.com/path` and response returned to the client.
 
-Note that ProxyingRequestHandler only translates to HTTPS targets. If you need HTTP, you can fix it by creating a subclass
-and overriding its `connect_target` method.
-
+Notes:
+* This is sort of a reverse proxy - from the browser standpoint it behaves as a target server. You do not configure any proxy server in the browser, just point it to `localhost:8080` instead of the real target.
+* The 'ProxyingRequestHandler' will modify request headers changing the `Host` header value from whatever your browser put there to the specified remote host.
+* Note that `ProxyingRequestHandler` only translates to HTTPS targets. If you need HTTP, you can fix it by creating a subclass and overriding its `connect_target` method.
 
 ## Combining them together
 
@@ -66,7 +67,7 @@ server.run
 Note that prefix is not removed from the URI when it is passed to a handler, so the static content
 handler from the example above will be receiving URIs like `/static/dir/test.html` and so you need directory `static`
 to exist.
-Similarly, if you make a request to `http://localhost:8080/rest/rest/auth/1/session`, the proxying handler will invoke `https://jira.domain.com/rest/rest/auth/1/session` keeping the `/rest` part.
+Similarly, if you make a request to `http://localhost:8080/rest/auth/1/session`, the proxying handler will invoke `https://jira.domain.com/rest/auth/1/session` keeping the `/rest` part.
 
 ## Modifying proxied request/response
 Sometimes (or should I say often?) you will find yourself in a need to patch request or response headers.
@@ -98,4 +99,23 @@ and change path prefix in the request URI. So a request to `http://localhost:808
 
 The `modify_response` just removes all cookies from the response before passing it to the client.
 
+### Keeping secure cookies
+If you are proxying HTTP requests and sending them to HTTPS server, chances are the server will return you cookies with `Secure` attribute. Which, when transferred to the client via HTTP connection will be ignored by the browser.
+So if you want your browser to actually use these cookies, you need to remove `Secure` attribute from them.
+For my JIRA experiments I did:
 
+```ruby
+  def modify_response(response)
+    # Remove "Secure" from all the Set-Cookie headers returned because browser won't store them otherwise
+    # (The browser makes HTTP connection to the proxy and it does not know that proxy connects to the JIRA with HTTPS)
+    response.headers.each { |h|
+      h.value.gsub!(/\s*Secure\s*(;|$)/, '') if h.name == 'Set-Cookie'
+    }
+  end
+```
+
+## Limitations
+There are plenty. This is not your production web server / proxy server but more of a test tool.
+* `StaticFilesRequestHandler` does not set any `Content-Type` header at all
+* `ProxyingRequestHandler` only supports HTTPS targets
+* `ProxyingRequestHandler` only supports single request per connection. It will fail if browser tries to reuse the connection and to work around the issue, adds `Connection: close` header to both request and response in attempt to disable keep-alive.
