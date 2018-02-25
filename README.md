@@ -10,7 +10,7 @@ of the same-origin policy. Also, it was JIRA 6.something with JSONP support alre
 so I could not think of other options other than proxying requests to it through
 the same server that was used to load HTML. So I needed something that serves as both
 web server for my HTML pages and a sort of a proxy that can relay requests to JIRA
-as a temporary solutuib until admins can configure JIRA with proper CORS headers.
+as a temporary solution until admins can configure JIRA with proper CORS headers.
 
 ## What is proxybricks
 
@@ -47,7 +47,7 @@ Any request to `http://localhost:8080/path` will be relayed to `https://target.d
 
 Notes:
 * This is sort of a reverse proxy - from the browser standpoint it behaves as a target server. You do not configure any proxy server in the browser, just point it to `localhost:8080` instead of the real target.
-* The 'ProxyingRequestHandler' will modify request headers changing the `Host` header value from whatever your browser put there to the specified remote host.
+* The `ProxyingRequestHandler` will modify request headers changing the `Host` header value from whatever your browser put there to the specified remote host.
 * Note that `ProxyingRequestHandler` only translates to HTTPS targets. If you need HTTP, you can fix it by creating a subclass and overriding its `connect_target` method.
 
 ## Combining them together
@@ -70,8 +70,8 @@ to exist.
 Similarly, if you make a request to `http://localhost:8080/rest/auth/1/session`, the proxying handler will invoke `https://jira.domain.com/rest/auth/1/session` keeping the `/rest` part.
 
 ## Modifying proxied request/response
-Sometimes (or should I say often?) you will find yourself in a need to patch request or response headers.
-To do that, you need to subclass ProxyingRequestHandler and override `modify_request` and/or `modify_response` methods.
+Sometimes (often really) you will find yourself in a need to patch request or response headers.
+To do that, you need to subclass `ProxyingRequestHandler` and override `modify_request` and/or `modify_response` methods.
 
 ```ruby
 class TestRequestHandler < ProxyingRequestHandler
