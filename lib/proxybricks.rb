@@ -296,6 +296,7 @@ class ProxyingRequestHandler < HttpRequestHandler
     tcp_socket = TCPSocket.new(@target_host, @target_port)
     ssl_context = OpenSSL::SSL::SSLContext.new
     ssl_socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
+    ssl_socket.hostname = @target_host
     ssl_socket.connect
     ssl_socket
   end
